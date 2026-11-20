@@ -12,7 +12,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATA_PATH = BASE_DIR / "data" / "raw" / "Online Retail.xlsx"
+DATA_PATH = BASE_DIR / "data" / "raw" / "online_retail_II.xlsx"
 DB_PATH = BASE_DIR / "retail.db"
 SQL_PATH = BASE_DIR / "sql" / "01_cleaning.sql"
 
@@ -23,8 +23,9 @@ SQL_PATH = BASE_DIR / "sql" / "01_cleaning.sql"
 # -----------------------------------------
 
 print("Loading Excel file...")
+sheets = pd.read_excel(DATA_PATH, sheet_name=None)
+df = pd.concat(sheets.values(), ignore_index=True)
 
-df = pd.read_excel(DATA_PATH)
 
 # -----------------------------------------
 
@@ -34,9 +35,16 @@ df = pd.read_excel(DATA_PATH)
 
 print("Initial cleaning...")
 
+# Column names may have leading/trailing spaces, so we strip them
+df.columns = df.columns.str.strip()
+
+# If the column "Customer ID" exists and "CustomerID" does not, rename it
+if "Customer ID" in df.columns and "CustomerID" not in df.columns:
+    df = df.rename(columns={"Customer ID": "CustomerID"})
 # Drop rows without customer
 
 df = df.dropna(subset=["CustomerID"])
+
 
 # Fix data types
 

@@ -15,18 +15,18 @@ DROP TABLE IF EXISTS retail_clean;
 
 CREATE TABLE retail_clean AS
 SELECT
-    InvoiceNo,
+    Invoice,
     StockCode,
     Description,
     Quantity,
     InvoiceDate,
-    UnitPrice,
+    Price,
     CustomerID,
     Country
 FROM retail
 WHERE
     Quantity > 0
-    AND UnitPrice > 0
+    AND Price > 0
     AND CustomerID IS NOT NULL;
 
 -- 2. Eliminate duplicates (optional but recommended)
@@ -41,7 +41,7 @@ SELECT *
 FROM (
     SELECT *,
         ROW_NUMBER() OVER (
-            PARTITION BY InvoiceNo, StockCode, Quantity, UnitPrice, CustomerID
+            PARTITION BY Invoice, StockCode, Quantity, Price, CustomerID
             ORDER BY InvoiceDate
         ) AS rn
     FROM retail_clean

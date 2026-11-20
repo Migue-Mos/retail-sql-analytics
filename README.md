@@ -1,52 +1,39 @@
-# Retail SQL Analytics
+# Retail SQL & Power BI Analytics
 
 ## Project Overview
 
-This project analyzes transactional retail data using SQL and Python to uncover key business insights related to revenue, customer behavior, and product performance.
+End-to-end retail analytics project combining **Python**, **SQLite**, and **Power BI** to transform raw transactional data (2009–2011) into a structured analytical schema and an interactive dashboard.
 
-The workflow includes:
+The workflow covers:
+- **ETL & Data Ingestion:** Loading and concatenating multi-sheet Excel records (`Online Retail II`) with Python (`pandas`).
+- **Data Cleaning & Modeling:** Filtering invalid transactions/returns, standardizing customer and date fields, and building analytical tables (`customers`, `products`, `sales`) in SQLite.
+- **SQL Business Analysis:** Querying core KPIs, customer rankings, and product performance.
+- **Executive Reporting:** Designing a Power BI report tracking revenue, order volume, AOV, active customers, monthly seasonality, and country distribution.
 
-- Data ingestion from Excel files
-- Data cleaning and transformation
-- Relational schema creation
-- SQL-based business analysis
-- Data visualization in Jupyter Notebook
+---
 
-The goal of the project is to simulate a real-world analytics workflow using a reproducible data pipeline and structured SQL analysis.
+## Dashboard Preview
+
+![Power BI Retail Overview](docs/powerbi_overview.png)
+
 
 ---
 
 ## Dataset
 
-The dataset used in this project is the **Online Retail Dataset**, containing transactional data from a UK-based online retailer.
-
-The dataset includes:
-
-- Customer purchases
-- Product information
-- Invoice data
-- Transaction timestamps
-- Geographic information
+This project uses the **Online Retail II Dataset**, containing real transactional records from a UK-based online retailer across **2009–2011**, including:
+- Invoice numbers and transaction timestamps
+- Product stock codes, descriptions, and unit prices
+- Customer IDs and country-level geographic data
 
 ---
 
 ## Tech Stack
 
-- **Python**
-  - pandas
-  - sqlite3
-  - matplotlib
-
-- **SQL**
-  - SQLite
-  - JOINs
-  - Aggregations
-  - Window Functions
-
-- **Jupyter Notebook**
-  - Exploratory analysis
-  - Visualizations
-  - Business insights
+- **Python:** `pandas`, `sqlite3`, `openpyxl`
+- **SQL:** SQLite (schema design, joins, aggregations, window functions)
+- **Business Intelligence:** Power BI Desktop (DAX measures, data modeling, time-series & bar visualizations)
+- **Jupyter Notebook:** Exploratory data analysis (`notebooks/analysis.ipynb`)
 
 ---
 
@@ -56,10 +43,12 @@ The dataset includes:
 retail-sql-analytics/
 │
 ├── data/
-│   └── raw/
-│       └── Online Retail.xlsx
+│   ├── raw/
+│   │   └── online_retail_II.xlsx
+│   └── processed/               # CSV exports feeding Power BI
 │
 ├── docs/
+│   ├── powerbi_overview.png     # Final Power BI dashboard screenshot
 │   ├── Monthly Revenue Trend.png
 │   ├── Top 10 Customers by Spending.png
 │   └── Top 10 Products by Revenue.png
@@ -67,8 +56,11 @@ retail-sql-analytics/
 ├── notebooks/
 │   └── analysis.ipynb
 │
+├── powerbi/
+│   └── retail_analytics.pbix    # Power BI Desktop report
+│
 ├── scripts/
-│   └── load_and_clean.py
+│   └── load_and_clean.py        # Multi-sheet ingestion & SQLite pipeline
 │
 ├── sql/
 │   ├── 01_cleaning.sql
@@ -77,108 +69,59 @@ retail-sql-analytics/
 │   └── 04_ranking.sql
 │
 ├── retail.db
-│
 ├── requirements.txt
-│
 └── README.md
 ```
 
-## Data Cleaning Pipeline
+---
 
-The ETL pipeline was built using Python and SQLite.
+## Data Pipeline & Relational Model
 
-Main cleaning steps included:
-
-- Removing returns and invalid transactions
-- Filtering null customer IDs
-- Removing duplicate records
-- Creating clean analytical tables
-
-The pipeline automatically:
-
-1. Loads the raw Excel dataset
-2. Cleans the data
-3. Creates a relational schema
-4. Stores the processed data in SQLite
-5. Relational Schema
+The pipeline in `scripts/load_and_clean.py` automates ingestion and transformation:
+1. Reads and concatenates all sheets from `online_retail_II.xlsx`.
+2. Removes records with missing `CustomerID`, returns/cancellations, and invalid prices/quantities.
+3. Loads raw data into SQLite (`retail`) and executes `01_cleaning.sql` and `02_schema.sql`.
+4. Produces analytical tables ready for SQL querying and Power BI reporting:
+   - **`customers`** (`customer_id`, `country`)
+   - **`products`** (`product_id`, `description`, `price`)
+   - **`sales`** (`sale_id`, `invoice`, `customer_id`, `product_id`, `quantity`, `price`, `sale_date`)
 
 ---
 
-The cleaned dataset was transformed into a relational model composed of:
+## Key Business Insights (2009–2011)
 
-- customers
-- products
-- sales
-
-This structure allows for more efficient analytical queries and business reporting.
-
----
-
-## SQL Analysis
-
-The project includes multiple SQL analysis files covering:
-
-## KPI Analysis
-- Total revenue
-- Total orders
-- Average order value
-- Revenue trends
-## Ranking Analysis
-- Top customers
-- Top products
-- Revenue contribution analysis
+- **Scale & Core Metrics:** Processed **~37K valid orders** across **5,878 active customers**, generating **~$1.59M** in total revenue.
+- **Strong Q4 Seasonality:** Monthly revenue shows consistent year-end peaks in **November–December** across both 2010 and 2011, driven by holiday demand.
+- **Geographic Concentration:** **United Kingdom** dominates total revenue by a wide margin, followed by European markets such as **EIRE**, **Netherlands**, **Germany**, and **France**.
+- **Pareto Revenue Distribution:** A relatively small segment of repeat customers and top-selling SKUs accounts for a disproportionate share of overall sales.
 
 ---
-
-### Visualizations
-
-The analysis notebook includes visualizations such as:
-
-- Monthly revenue trends
-- Top-performing products
-- Customer spending distribution
-
-These visualizations help transform raw SQL outputs into actionable business insights.
-
----
-
-## Key Insights
-
-Some of the main findings from the analysis include:
-
-- Revenue is highly concentrated among a relatively small group of customers.
-- A limited number of products generate a significant share of total revenue.
-- Monthly sales patterns suggest possible seasonality effects.
-- Ranking analysis highlights the importance of high-value customers and best-selling products.
-
---- 
 
 ## How to Run
-1. Clone the repository
-git clone <your-repository-url>
 
-2. Install dependencies
-pip install -r requirements.txt
+1. **Clone the repository**
+   ```bash
+   git clone <your-repository-url>
+   cd retail-sql-analytics
+   ```
 
-3. Run the data pipeline
-python scripts/load_and_clean.py
+2. **Install Python dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-4. Open the notebook
-Launch Jupyter Notebook and open:
+3. **Run the ETL & SQLite pipeline**
+   ```bash
+   python scripts/load_and_clean.py
+   ```
 
-notebooks/analysis.ipynb
-
+4. **Explore the Power BI Dashboard**
+   Open `powerbi/retail_analytics.pbix` in **Power BI Desktop** and click **Refresh** to load the latest processed tables.
 
 ---
 
 ## Future Improvements
-- Interactive dashboards (Power BI / Tableau)
-- Customer segmentation analysis
-- Cohort retention analysis
-- Advanced forecasting models
 
-## Key Results
-
-- Identified revenue concentration in top customers
-- Analyzed product-level performance
-- Built full ETL + analytics pipeline using SQL + Python
+- RFM (Recency, Frequency, Monetary) customer segmentation page in Power BI
+- Cohort retention analysis by acquisition month
+- Automated CSV export step integrated directly at the end of `load_and_clean.py`

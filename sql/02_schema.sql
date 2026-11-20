@@ -6,22 +6,25 @@
 -- 1. CUSTOMERS TABLE
 
 DROP TABLE IF EXISTS customers;
-
 CREATE TABLE customers AS
-SELECT DISTINCT
+SELECT
     CustomerID as customer_id,
-    Country as country
-FROM retail_final;
+    MIN(Country) AS country
+FROM retail_final
+WHERE customer_id IS NOT NULL
+GROUP BY customer_id;
+
+
 
 -- 2. PRODUCTS TABLE
-
 DROP TABLE IF EXISTS products;
-
 CREATE TABLE products AS
-SELECT DISTINCT
+SELECT
     StockCode AS product_id,
-    Description AS product_name
-FROM retail_final;
+    MIN(Description) AS product_name
+FROM retail_final
+WHERE product_id IS NOT NULL
+GROUP BY product_id;
 
 -- 3. SALES TABLE (FACT TABLE)
 DROP TABLE IF EXISTS sales;
@@ -32,9 +35,9 @@ SELECT
     CustomerID AS customer_id,
     StockCode AS product_id,
     Quantity AS quantity,
-    UnitPrice AS price,
+    Price AS price,
     InvoiceDate AS sale_date,
-    InvoiceNo AS invoice_no
+    Invoice AS invoice
 FROM retail_final;
 
 -- 4. OPTIONAL: CREATE INDEXES (performance)
